@@ -23,6 +23,16 @@ class Transaction
         $this->postings[] = $posting;
     }
 
+    public function getPostings(): array
+    {
+        return $this->postings;
+    }
+
+    public function setPostings(array $postings): void
+    {
+        $this->postings = $postings;
+    }
+
     public function toArray(): array
     {
         return [

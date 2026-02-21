@@ -88,6 +88,7 @@ if ($expanded) {
                     </option>
                 <?php endforeach; ?>
             </select>
+            <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
         </form>
     </div>
     

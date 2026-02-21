@@ -13,39 +13,38 @@ class CacheManager
     public function __construct()
     {
         $this->context = UserContext::get();
-        $this->parser = new JournalParser();
+        $this->parser  = new JournalParser();
     }
 
     public function getFileData(string $name): array
     {
-        $dataFile = $this->context->getDataPath($name . '.journal');
-        $cacheFile = $this->context->getCachePath($name . '.php');
+        $dataFile  = $this->context->getDataPath($name . '.journal');
+        $cacheFile = $this->context->getCachePath($name . '.json'); // JSON, non PHP
 
-        // 1. Check if Data exists
+        // 1. Nessun journal, nessun dato
         if (!file_exists($dataFile)) {
-            // No data, empty result
             return [];
         }
 
-        // 2. Check if Cache is valid
+        // 2. Cache valida?
         if (file_exists($cacheFile)) {
-            $dataTime = filemtime($dataFile);
+            $dataTime  = filemtime($dataFile);
             $cacheTime = filemtime($cacheFile);
 
             if ($cacheTime >= $dataTime) {
-                // Cache Hit
-                return require $cacheFile;
+                // Cache hit
+                $decoded = json_decode(file_get_contents($cacheFile), true);
+                return is_array($decoded) ? $decoded : [];
             }
         }
 
-        // 3. Cache Miss or Stale -> Parse
+        // 3. Cache miss o scaduta → parsing
         $data = $this->parser->parse($dataFile);
 
-        // 4. Write Cache
-        $content = "<?php\n\nreturn " . var_export($data, true) . ";\n";
-        file_put_contents($cacheFile, $content);
+        // 4. Scrivi cache come JSON (non eseguibile, nessun rischio code injection)
+        file_put_contents($cacheFile, json_encode($data));
 
-        // Invalidate Aggregates whenever a year is re-parsed (simplification)
+        // Invalida aggregati ogni volta che un file viene ri-parsato
         $this->invalidateAggregates();
 
         return $data;
@@ -53,26 +52,42 @@ class CacheManager
 
     public function invalidateFile(string $name): void
     {
-        $cacheFile = $this->context->getCachePath($name . '.php');
+        $cacheFile = $this->context->getCachePath($name . '.json');
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
+        }
+        // Compatibilità: rimuovi anche eventuale cache .php legacy
+        $legacyCache = $this->context->getCachePath($name . '.php');
+        if (file_exists($legacyCache)) {
+            unlink($legacyCache);
         }
         $this->invalidateAggregates();
     }
 
     public function invalidateAggregates(): void
     {
-        $aggFile = $this->context->getCachePath('aggregates.php');
-        if (file_exists($aggFile)) {
-            unlink($aggFile);
+        // Rimuovi sia la versione .php legacy che quella .json
+        foreach (['aggregates.php', 'aggregates.json'] as $filename) {
+            $file = $this->context->getCachePath($filename);
+            if (file_exists($file)) {
+                unlink($file);
+            }
         }
     }
 
     public function clearAll(): void
     {
         $cachePath = $this->context->getCachePath();
-        $files = glob($cachePath . '/*.php');
-        foreach ($files as $file) {
+
+        // Rimuovi tutti i .json di cache (escluso settings)
+        foreach (glob($cachePath . '/*.json') as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+
+        // Rimuovi anche eventuali .php legacy (escluso settings.php)
+        foreach (glob($cachePath . '/*.php') as $file) {
             if (is_file($file) && basename($file) !== 'settings.php') {
                 unlink($file);
             }

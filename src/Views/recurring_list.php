@@ -108,6 +108,8 @@ usort($upcomingExecutions, fn($a, $b) => strcmp($a['next_run_date'], $b['next_ru
                         <form action="/recurring/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this automated transaction?')">
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($rec['id']); ?>">
                             <button type="submit" class="btn btn-danger btn-sm" style="background: #ff4d4d33; color: #ff4d4d;"><?php echo __('admin_delete'); ?></button>
+                            <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
+
                         </form>
                     </td>
                 </tr>

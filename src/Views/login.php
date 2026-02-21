@@ -12,4 +12,5 @@
         <input type="password" id="password" name="password" required>
     </div>
     <button type="submit" class="btn">Log In</button>
+    <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
 </form>

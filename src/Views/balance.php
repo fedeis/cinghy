@@ -22,6 +22,8 @@
         </select>
         
         <button type="submit" class="btn-primary">Update</button>
+        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
+
     </form>
 </div>
 

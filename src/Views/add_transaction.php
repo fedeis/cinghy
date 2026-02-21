@@ -83,6 +83,7 @@ $termExpenses = $settings['term_expenses'] ?? 'Expenses';
         <button type="submit" class="btn btn-primary"><?php echo $isEdit ? __('tx_btn_update') : __('tx_btn_save'); ?></button> 
         <a href="/transactions" class="btn btn-secondary"><?php echo __('tx_btn_cancel'); ?></a>
     </div>
+    <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
 </form>
 
 <script>

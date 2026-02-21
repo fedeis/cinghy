@@ -5,5 +5,6 @@ if (isset($has_discrepancy) && $has_discrepancy): ?>
     </div>
 <?php endif; 
 
+
 $renderer = new \App\Dashboard\WidgetRenderer($settings ?? []);
 $renderer->renderAll(); ?>

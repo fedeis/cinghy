@@ -229,4 +229,5 @@
     <div class="mt-4">
         <button type="submit" class="btn btn-primary"><?php echo __('settings_save'); ?></button>
     </div>
+    <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
 </form>

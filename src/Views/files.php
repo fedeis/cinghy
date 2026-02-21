@@ -31,6 +31,7 @@
                             <form action="/files/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this file? This cannot be undone.')">
                                 <input type="hidden" name="filename" value="<?php echo htmlspecialchars($file['name']); ?>">
                                 <button type="submit" class="btn-icon" title="Delete">🗑️</button>
+                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
                             </form>
                         </div>
                     </td>

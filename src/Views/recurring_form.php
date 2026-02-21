@@ -100,6 +100,7 @@ $formAction = $isEdit ? '/recurring/edit' : '/recurring/add';
         <button type="submit" class="btn btn-primary"><?php echo $isEdit ? __('tx_btn_update') : __('tx_btn_save'); ?></button> 
         <a href="/recurring" class="btn btn-secondary"><?php echo __('tx_btn_cancel'); ?></a>
     </div>
+    <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
 </form>
 
 <script>

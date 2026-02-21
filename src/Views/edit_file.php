@@ -26,6 +26,7 @@
             <input type="hidden" name="filename" value="<?php echo htmlspecialchars($filename); ?>">
         <?php endif; ?>
         <textarea name="content" class="editor-textarea" spellcheck="false"><?php echo htmlspecialchars($content); ?></textarea>
+        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
     </form>
 </div>
 

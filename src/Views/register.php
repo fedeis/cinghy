@@ -25,4 +25,5 @@
         <input type="password" id="password_confirm" name="password_confirm" required>
     </div>
     <button type="submit" class="btn">Complete Setup</button>
+    <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
 </form>

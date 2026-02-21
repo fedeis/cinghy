@@ -15,28 +15,27 @@ class FilesController
         $fileList = [];
         foreach ($files as $file) {
             $fileList[] = [
-                'name' => basename($file),
-                'path' => $file,
-                'size' => filesize($file),
-                'modified' => filemtime($file)
+                'name'     => basename($file),
+                'path'     => $file,
+                'size'     => filesize($file),
+                'modified' => filemtime($file),
             ];
         }
 
-        // Sort by modified time descending
         usort($fileList, fn($a, $b) => $b['modified'] <=> $a['modified']);
 
         render('files', [
             'title' => 'Cinghy - Files',
-            'files' => $fileList
+            'files' => $fileList,
         ]);
     }
 
     public function create(): void
     {
         render('edit_file', [
-            'title' => 'Cinghy - New Journal',
+            'title'    => 'Cinghy - New Journal',
             'filename' => '',
-            'content' => "; New Journal\n\n"
+            'content'  => "; New Journal\n\n",
         ]);
     }
 
@@ -48,7 +47,7 @@ class FilesController
             exit;
         }
 
-        $ctx = UserContext::get();
+        $ctx      = UserContext::get();
         $dataPath = $ctx->getDataPath();
         $filePath = realpath($dataPath . '/' . basename($filename));
 
@@ -67,28 +66,30 @@ class FilesController
         $content = file_get_contents($filePath);
 
         render('edit_file', [
-            'title' => 'Cinghy - Editing ' . $filename,
+            'title'    => 'Cinghy - Editing ' . htmlspecialchars($filename),
             'filename' => $filename,
-            'content' => $content
+            'content'  => $content,
         ]);
     }
 
     public function save(): void
     {
         $filename = $_POST['filename'] ?? '';
-        $content = $_POST['content'] ?? '';
+        $content  = $_POST['content']  ?? '';
 
         if (empty($filename)) {
             header('Location: /files');
             exit;
         }
 
-        $ctx = UserContext::get();
-        $dataPath = realpath($ctx->getDataPath());
-        $filePath = $dataPath . '/' . basename($filename);
+        $ctx      = UserContext::get();
+        $safeBase = realpath($ctx->getDataPath());
+        $filePath = $safeBase . '/' . basename($filename);
 
-        // Security check: ensure path is within data directory
-        if (strpos(realpath(dirname($filePath)), $dataPath) !== 0) {
+        // Security check: il path finale deve stare dentro la data directory.
+        // Usiamo str_starts_with sul path costruito (non su realpath che ritorna
+        // false se il file non esiste ancora) per coprire anche la creazione di nuovi file.
+        if (!str_starts_with($filePath, $safeBase . '/')) {
             http_response_code(403);
             echo "Access denied.";
             exit;
@@ -97,7 +98,6 @@ class FilesController
         file_put_contents($filePath, $content);
         (new \App\Core\GitHubSyncService())->syncFile(basename($filename), $content, "Updated {$filename} via File Manager");
 
-        // Clear cache for this file if necessary
         $cache = new \App\Cache\CacheManager();
         $cache->invalidateFile(basename($filename, '.journal'));
 
@@ -113,11 +113,11 @@ class FilesController
             exit;
         }
 
-        $ctx = UserContext::get();
+        $ctx      = UserContext::get();
         $dataPath = realpath($ctx->getDataPath());
         $filePath = realpath($dataPath . '/' . basename($filename));
 
-        if (!$filePath || strpos($filePath, $dataPath) !== 0) {
+        if (!$filePath || !str_starts_with($filePath, $dataPath . '/')) {
             http_response_code(403);
             echo "Access denied.";
             exit;

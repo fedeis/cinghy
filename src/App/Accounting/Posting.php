@@ -5,10 +5,10 @@ namespace App\Accounting;
 class Posting
 {
     public string $account;
-    public float $amount;
-    public string $currency; // EUR, USD, etc.
+    public ?float $amount;
+    public ?string $currency; // EUR, USD, etc.
 
-    public function __construct(string $account, float $amount, string $currency)
+    public function __construct(string $account, ?float $amount, ?string $currency)
     {
         $this->account = $account;
         $this->amount = $amount;
@@ -24,8 +24,8 @@ class Posting
     {
         return [
             'account' => $this->account,
-            'amount' => $this->amount,
-            'currency' => $this->currency,
+            'amount' => $this->amount ?? 0.0,
+            'currency' => $this->currency ?? 'EUR',
         ];
     }
 }

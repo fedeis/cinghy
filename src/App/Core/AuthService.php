@@ -7,6 +7,11 @@ class AuthService
     private string $usersFile;
     private array $users = [];
 
+    // Max tentativi di login falliti prima del blocco temporaneo
+    private const MAX_ATTEMPTS    = 10;
+    // Secondi di blocco dopo MAX_ATTEMPTS tentativi falliti
+    private const LOCKOUT_SECONDS = 900; // 15 minuti
+
     public function __construct()
     {
         $this->usersFile = __DIR__ . '/../../../config/users.json';
@@ -39,8 +44,8 @@ class AuthService
 
         $this->users[$username] = [
             'password' => password_hash($password, PASSWORD_BCRYPT),
-            'email' => $email,
-            'role' => $role
+            'email'    => $email,
+            'role'     => $role,
         ];
 
         $this->saveUsers();
@@ -49,16 +54,47 @@ class AuthService
 
     public function login(string $username, string $password): bool
     {
-        if (!isset($this->users[$username])) {
+        // --- Brute force protection ---
+        $attempts    = $_SESSION['login_attempts']    ?? 0;
+        $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
+
+        // Reset contatore se il lockout è scaduto
+        if (time() - $lastAttempt > self::LOCKOUT_SECONDS) {
+            $attempts = 0;
+        }
+
+        if ($attempts >= self::MAX_ATTEMPTS) {
+            return false; // ancora in lockout
+        }
+        // --- Fine brute force protection ---
+
+        if (!isset($this->users[$username]) ||
+            !password_verify($password, $this->users[$username]['password'])) {
+            $_SESSION['login_attempts']    = $attempts + 1;
+            $_SESSION['login_last_attempt'] = time();
             return false;
         }
 
-        if (password_verify($password, $this->users[$username]['password'])) {
-            $_SESSION['user'] = $username;
-            return true;
-        }
+        // Login riuscito: resetta il contatore e avvia la sessione
+        $_SESSION['login_attempts']    = 0;
+        $_SESSION['login_last_attempt'] = 0;
+        $_SESSION['user']              = $username;
+        return true;
+    }
 
-        return false;
+    /**
+     * Restituisce i secondi rimanenti al termine del lockout, oppure 0 se non in lockout.
+     */
+    public function getLockoutRemaining(): int
+    {
+        $attempts    = $_SESSION['login_attempts']    ?? 0;
+        $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
+
+        if ($attempts < self::MAX_ATTEMPTS) return 0;
+
+        $elapsed   = time() - $lastAttempt;
+        $remaining = self::LOCKOUT_SECONDS - $elapsed;
+        return max(0, (int)$remaining);
     }
 
     public function logout(): void
@@ -76,7 +112,7 @@ class AuthService
     {
         return $this->users[$username] ?? null;
     }
-    
+
     public function getAllUsers(): array
     {
         return $this->users;
@@ -98,8 +134,8 @@ class AuthService
         if (!isset($this->users[$username])) {
             return false;
         }
-        
-        // Don't allow deleting the last superadmin
+
+        // Non eliminare l'ultimo superadmin
         if ($this->users[$username]['role'] === 'superadmin') {
             $superAdminCount = 0;
             foreach ($this->users as $u) {

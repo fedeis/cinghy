@@ -1110,3 +1110,4 @@ $router->post('/recurring/delete', function() {
 });
 
 $router->dispatch();
+\App\Core\GitHubSyncService::flushAndContinue();

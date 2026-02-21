@@ -40,6 +40,7 @@
                     <form action="/admin/users/delete" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user? This cannot be undone.')">
                         <input type="hidden" name="username" value="<?= htmlspecialchars($username) ?>">
                         <button type="submit" class="btn btn-danger btn-sm" style="background: #ff4d4d33; color: #ff4d4d;">Delete</button>
+                        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
                     </form>
                 </td>
             </tr>
@@ -79,6 +80,7 @@
             <button type="button" class="btn btn-secondary" style="padding:0.5rem 1rem; border-radius:4px; background:var(--surface-3); color:inherit; border:none; cursor:pointer;" onclick="document.getElementById('createUserModal').close()">Cancel</button>
             <button type="submit" class="btn btn-primary" style="padding:0.5rem 1rem; border-radius:4px; background:var(--accent-color); color:var(--accent-contrast); border:none; cursor:pointer; font-weight:bold;">Create</button>
         </div>
+        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
     </form>
 </dialog>
 
@@ -96,6 +98,7 @@
             <button type="button" class="btn btn-secondary" style="padding:0.5rem 1rem; border-radius:4px; background:var(--surface-3); color:inherit; border:none; cursor:pointer;" onclick="document.getElementById('updatePasswordModal').close()">Cancel</button>
             <button type="submit" class="btn btn-primary" style="padding:0.5rem 1rem; border-radius:4px; background:var(--accent-color); color:var(--accent-contrast); border:none; cursor:pointer; font-weight:bold;">Update Password</button>
         </div>
+        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
     </form>
 </dialog>
 

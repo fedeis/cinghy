@@ -11,57 +11,137 @@ class GitHubSyncService
         $this->context = UserContext::get();
     }
 
+    /**
+     * Accoda il sync da eseguire in background dopo che la risposta
+     * è già stata inviata al browser (via flushAndContinue).
+     *
+     * I dati vengono salvati in sessione e processati da flushAndContinue(),
+     * che va chiamata una volta sola alla fine del ciclo di richiesta
+     * (tipicamente in index.php, dopo il dispatch del router).
+     */
     public function syncFile(string $filename, string $content, string $message = ''): void
     {
         $settings = $this->context->getSettings();
-        if (empty($settings['github_sync_enabled']) || empty($settings['github_token']) || empty($settings['github_repo'])) {
+        if (empty($settings['github_sync_enabled']) ||
+            empty($settings['github_token']) ||
+            empty($settings['github_repo'])) {
             return;
         }
 
-        $token = escapeshellarg($settings['github_token']);
-        $repo = escapeshellcmd($settings['github_repo']);
-        $branch = escapeshellcmd($settings['github_branch'] ?? 'main');
-        $message = escapeshellcmd($message ?: "Auto save {$filename} via Cinghy");
-        $filename = escapeshellcmd($filename);
+        // Accoda il job in sessione — verrà processato dopo il flush
+        $_SESSION['github_sync_queue'][] = [
+            'filename' => $filename,
+            'content'  => $content,
+            'message'  => $message ?: "Auto save {$filename} via Cinghy",
+            'settings' => [
+                'token'  => $settings['github_token'],
+                'repo'   => $settings['github_repo'],
+                'branch' => $settings['github_branch'] ?? 'main',
+            ],
+        ];
+    }
 
-        $url = "https://api.github.com/repos/{$repo}/contents/{$filename}";
-        
-        // Timeout curl quickly to get SHA if it exists, so we don't totally stall
-        $sha = $this->getFileSha($repo, $filename, $branch, $settings['github_token']);
-        
+    /**
+     * Da chiamare una volta sola alla fine di index.php, dopo il dispatch:
+     *
+     *   \App\Core\GitHubSyncService::flushAndContinue();
+     *
+     * Invia la risposta al browser e poi processa la coda in background.
+     */
+    public static function flushAndContinue(): void
+    {
+        $queue = $_SESSION['github_sync_queue'] ?? [];
+        if (empty($queue)) {
+            return;
+        }
+
+        // Svuota la coda prima del flush, così non viene ri-processata
+        unset($_SESSION['github_sync_queue']);
+
+        // Invia la risposta al browser e chiude la connessione HTTP
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            // Fallback per ambienti non FastCGI (es. Apache mod_php)
+            ob_end_flush();
+            flush();
+        }
+
+        // Da qui in poi il browser ha già ricevuto la risposta,
+        // ma PHP continua ad eseguire in background
+        ignore_user_abort(true);
+        set_time_limit(30);
+
+        foreach ($queue as $job) {
+            self::pushToGitHub(
+                $job['filename'],
+                $job['content'],
+                $job['message'],
+                $job['settings']
+            );
+        }
+    }
+
+    private static function pushToGitHub(
+        string $filename,
+        string $content,
+        string $message,
+        array  $settings
+    ): void {
+        $token  = $settings['token'];
+        $repo   = $settings['repo'];
+        $branch = $settings['branch'];
+
+        $sha = self::fetchFileSha($repo, $filename, $branch, $token);
+
         $data = [
             'message' => $message,
             'content' => base64_encode($content),
-            'branch' => $branch
+            'branch'  => $branch,
         ];
-        
         if ($sha) {
             $data['sha'] = $sha;
         }
 
-        $jsonPayload = escapeshellarg(json_encode($data));
-        
-        // Execute the PUT request via shell cURL and send it to the background
-        $command = "curl -s -o /dev/null -w \"%{http_code}\" -X PUT -H \"Authorization: Bearer \"$token -H \"User-Agent: Cinghy-App\" -H \"Accept: application/vnd.github.v3+json\" -H \"Content-Type: application/json\" -d $jsonPayload \"$url\" > /dev/null 2>&1 &";
-        
-        exec($command);
+        $url = "https://api.github.com/repos/{$repo}/contents/{$filename}";
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'PUT',
+            CURLOPT_POSTFIELDS     => json_encode($data),
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'User-Agent: Cinghy-App',
+                'Accept: application/vnd.github.v3+json',
+                'Content-Type: application/json',
+            ],
+        ]);
+        curl_exec($ch);
     }
 
-    private function getFileSha(string $repo, string $filename, string $branch, string $token): ?string
-    {
+    private static function fetchFileSha(
+        string $repo,
+        string $filename,
+        string $branch,
+        string $token
+    ): ?string {
         $url = "https://api.github.com/repos/{$repo}/contents/{$filename}?ref={$branch}";
+
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 3); // 3 seconds timeout
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $token,
-            'User-Agent: Cinghy-App',
-            'Accept: application/vnd.github.v3+json'
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'User-Agent: Cinghy-App',
+                'Accept: application/vnd.github.v3+json',
+            ],
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         if ($httpCode === 200) {
             $data = json_decode($response, true);
