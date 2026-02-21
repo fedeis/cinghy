@@ -1,0 +1,13 @@
+/config
+/users
+.env
+.env.backup
+.env.production
+.DS_Store
+
+/auth.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed

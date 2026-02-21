@@ -1,0 +1,171 @@
+.postings {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.posting-row {
+    padding: 2px 0;
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.row {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.row-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.row-group .row {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+input[type=text],
+input[type=date],
+input[type=number],
+input[type=color],
+select {
+    font-family: var(--font-main);
+    padding: 8px 2px;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    color: var(--text-color);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: none;
+}
+
+.amount-input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 130px;
+}
+
+.amount-input-group input {
+    font-family: var(--font-mono);
+    text-align: right;
+}
+
+/* Custom Autocomplete */
+.autocomplete-container {
+    position: relative;
+    flex: 1;
+}
+
+.autocomplete-items {
+    position: absolute;
+    border-top: none;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-color-darker);
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.autocomplete-items div {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.autocomplete-items div:hover {
+    background-color: var(--card-bg);
+}
+
+.autocomplete-active {
+    background-color: var(--accent-color) !important;
+    color: #fff;
+}
+
+/* Sign Toggle Button */
+.sign-toggle {
+    display: block;
+    padding: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    width: 28px;
+    height: 28px;
+    line-height: 26px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.sign-toggle:active {
+    background: var(--border-color);
+}
+
+/* button,
+.btn,
+.btn-primary {
+    background: var(--accent-color);
+    color: var(--accent-contrast);
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: inline-block;
+    box-sizing: border-box;
+} */
+
+button:hover,
+.btn:hover,
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+@media (min-width: 600px) {
+    .row {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    label {
+        width: 140px;
+        margin-bottom: 0;
+    }
+
+    input[type=text],
+    input[type=date],
+    select {
+        flex: 1;
+    }
+}
