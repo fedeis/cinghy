@@ -5,30 +5,45 @@ namespace App\Core;
 class AuthService
 {
     private string $usersFile;
-    private array $users = [];
+    private string $tokensFile;
+    private array $users  = [];
+    private array $tokens = [];
 
-    // Max tentativi di login falliti prima del blocco temporaneo
-    private const MAX_ATTEMPTS    = 10;
-    // Secondi di blocco dopo MAX_ATTEMPTS tentativi falliti
-    private const LOCKOUT_SECONDS = 900; // 15 minuti
+    private const MAX_ATTEMPTS      = 10;
+    private const LOCKOUT_SECONDS   = 900;
+    private const REMEMBER_DAYS     = 90;
+    private const COOKIE_NAME       = 'cinghy_remember';
 
     public function __construct()
     {
-        $this->usersFile = __DIR__ . '/../../../config/users.json';
+        $this->usersFile  = __DIR__ . '/../../../config/users.json';
+        $this->tokensFile = __DIR__ . '/../../../config/remember_tokens.json';
         $this->loadUsers();
+        $this->loadTokens();
     }
 
     private function loadUsers(): void
     {
         if (file_exists($this->usersFile)) {
-            $json = file_get_contents($this->usersFile);
-            $this->users = json_decode($json, true) ?? [];
+            $this->users = json_decode(file_get_contents($this->usersFile), true) ?? [];
         }
     }
 
     private function saveUsers(): void
     {
         file_put_contents($this->usersFile, json_encode($this->users, JSON_PRETTY_PRINT));
+    }
+
+    private function loadTokens(): void
+    {
+        if (file_exists($this->tokensFile)) {
+            $this->tokens = json_decode(file_get_contents($this->tokensFile), true) ?? [];
+        }
+    }
+
+    private function saveTokens(): void
+    {
+        file_put_contents($this->tokensFile, json_encode($this->tokens, JSON_PRETTY_PRINT));
     }
 
     public function hasUsers(): bool
@@ -41,32 +56,30 @@ class AuthService
         if (isset($this->users[$username])) {
             return false;
         }
-
         $this->users[$username] = [
             'password' => password_hash($password, PASSWORD_BCRYPT),
             'email'    => $email,
             'role'     => $role,
         ];
-
         $this->saveUsers();
         return true;
     }
 
-    public function login(string $username, string $password): bool
+    /**
+     * Login con username e password.
+     * Se $remember = true, imposta un cookie remember-me a 30 giorni.
+     */
+    public function login(string $username, string $password, bool $remember = false): bool
     {
-        // --- Brute force protection ---
         $attempts    = $_SESSION['login_attempts']    ?? 0;
         $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
 
-        // Reset contatore se il lockout è scaduto
         if (time() - $lastAttempt > self::LOCKOUT_SECONDS) {
             $attempts = 0;
         }
-
         if ($attempts >= self::MAX_ATTEMPTS) {
-            return false; // ancora in lockout
+            return false;
         }
-        // --- Fine brute force protection ---
 
         if (!isset($this->users[$username]) ||
             !password_verify($password, $this->users[$username]['password'])) {
@@ -75,32 +88,100 @@ class AuthService
             return false;
         }
 
-        // Login riuscito: resetta il contatore e avvia la sessione
         $_SESSION['login_attempts']    = 0;
         $_SESSION['login_last_attempt'] = 0;
         $_SESSION['user']              = $username;
+
+        if ($remember) {
+            $this->setRememberCookie($username);
+        }
+
         return true;
     }
 
     /**
-     * Restituisce i secondi rimanenti al termine del lockout, oppure 0 se non in lockout.
+     * Controlla il cookie remember-me e, se valido, fa il login automatico.
+     * Da chiamare all'inizio di ogni richiesta prima del check isLoggedIn().
      */
-    public function getLockoutRemaining(): int
+    public function tryRememberLogin(): bool
     {
-        $attempts    = $_SESSION['login_attempts']    ?? 0;
-        $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
+        if ($this->isLoggedIn()) {
+            return false;
+        }
 
-        if ($attempts < self::MAX_ATTEMPTS) return 0;
+        $cookie = $_COOKIE[self::COOKIE_NAME] ?? '';
+        if (empty($cookie)) {
+            return false;
+        }
 
-        $elapsed   = time() - $lastAttempt;
-        $remaining = self::LOCKOUT_SECONDS - $elapsed;
-        return max(0, (int)$remaining);
+        $parts = explode(':', $cookie, 2);
+        if (count($parts) !== 2) {
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        [$username, $token] = $parts;
+
+        $this->purgeExpiredTokens();
+
+        if (!isset($this->users[$username])) {
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        $tokenHash = hash('sha256', $token);
+        $found     = false;
+
+        foreach ($this->tokens as $i => $entry) {
+            if ($entry['username'] === $username &&
+                hash_equals($entry['token_hash'], $tokenHash) &&
+                $entry['expires'] > time()) {
+                $found = true;
+                // Token rotation: ogni uso genera un nuovo token
+                unset($this->tokens[$i]);
+                $this->tokens = array_values($this->tokens);
+                $this->saveTokens();
+                break;
+            }
+        }
+
+        if (!$found) {
+            $this->clearRememberCookie();
+            return false;
+        }
+
+        $_SESSION['user'] = $username;
+        $this->setRememberCookie($username); // rinnova il cookie
+        return true;
     }
 
     public function logout(): void
     {
+        $cookie = $_COOKIE[self::COOKIE_NAME] ?? '';
+        if (!empty($cookie)) {
+            $parts = explode(':', $cookie, 2);
+            if (count($parts) === 2) {
+                [$username, $token] = $parts;
+                $tokenHash = hash('sha256', $token);
+                $this->tokens = array_values(array_filter(
+                    $this->tokens,
+                    fn($e) => !($e['username'] === $username && hash_equals($e['token_hash'], $tokenHash))
+                ));
+                $this->saveTokens();
+            }
+            $this->clearRememberCookie();
+        }
+
         unset($_SESSION['user']);
         session_destroy();
+    }
+
+    public function getLockoutRemaining(): int
+    {
+        $attempts    = $_SESSION['login_attempts']    ?? 0;
+        $lastAttempt = $_SESSION['login_last_attempt'] ?? 0;
+        if ($attempts < self::MAX_ATTEMPTS) return 0;
+        return max(0, (int)(self::LOCKOUT_SECONDS - (time() - $lastAttempt)));
     }
 
     public function getUser(): ?string
@@ -120,10 +201,7 @@ class AuthService
 
     public function updatePassword(string $username, string $newPassword): bool
     {
-        if (!isset($this->users[$username])) {
-            return false;
-        }
-
+        if (!isset($this->users[$username])) return false;
         $this->users[$username]['password'] = password_hash($newPassword, PASSWORD_BCRYPT);
         $this->saveUsers();
         return true;
@@ -131,20 +209,18 @@ class AuthService
 
     public function deleteUser(string $username): bool
     {
-        if (!isset($this->users[$username])) {
-            return false;
+        if (!isset($this->users[$username])) return false;
+
+        if ($this->users[$username]['role'] === 'superadmin') {
+            $count = count(array_filter($this->users, fn($u) => $u['role'] === 'superadmin'));
+            if ($count <= 1) return false;
         }
 
-        // Non eliminare l'ultimo superadmin
-        if ($this->users[$username]['role'] === 'superadmin') {
-            $superAdminCount = 0;
-            foreach ($this->users as $u) {
-                if ($u['role'] === 'superadmin') $superAdminCount++;
-            }
-            if ($superAdminCount <= 1) {
-                return false;
-            }
-        }
+        $this->tokens = array_values(array_filter(
+            $this->tokens,
+            fn($e) => $e['username'] !== $username
+        ));
+        $this->saveTokens();
 
         unset($this->users[$username]);
         $this->saveUsers();
@@ -161,5 +237,49 @@ class AuthService
         if (!$this->isLoggedIn()) return false;
         $username = $this->getUser();
         return isset($this->users[$username]) && $this->users[$username]['role'] === 'superadmin';
+    }
+
+    private function setRememberCookie(string $username): void
+    {
+        $token   = bin2hex(random_bytes(32));
+        $expires = time() + (self::REMEMBER_DAYS * 86400);
+
+        $this->tokens[] = [
+            'username'   => $username,
+            'token_hash' => hash('sha256', $token),
+            'expires'    => $expires,
+        ];
+        $this->saveTokens();
+
+        setcookie(self::COOKIE_NAME, $username . ':' . $token, [
+            'expires'  => $expires,
+            'path'     => '/',
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+    }
+
+    private function clearRememberCookie(): void
+    {
+        setcookie(self::COOKIE_NAME, '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+    }
+
+    private function purgeExpiredTokens(): void
+    {
+        $before = count($this->tokens);
+        $this->tokens = array_values(array_filter(
+            $this->tokens,
+            fn($e) => $e['expires'] > time()
+        ));
+        if (count($this->tokens) !== $before) {
+            $this->saveTokens();
+        }
     }
 }

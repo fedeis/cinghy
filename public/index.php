@@ -44,6 +44,7 @@ function render(string $viewPath, array $data = []) {
 
 $auth = new AuthService();
 $router = new Router();
+$auth->tryRememberLogin();
 
 // Middleware-like check
 if (!$auth->isLoggedIn()) {
@@ -106,7 +107,8 @@ if (!$auth->isLoggedIn()) {
         $user = trim($_POST['username'] ?? '');
         $pass = $_POST['password'] ?? '';
 
-        if ($auth->login($user, $pass)) {
+        $remember = isset($_POST['remember']) && $_POST['remember'] === '1';
+        if ($auth->login($user, $pass, $remember)) {
             header('Location: /');
         } else {
             render('login', ['title' => 'Cinghy - Login', 'layout' => 'auth_layout', 'error' => 'Invalid credentials']);
