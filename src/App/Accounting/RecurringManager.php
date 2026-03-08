@@ -56,7 +56,7 @@ class RecurringManager
         }
         
         file_put_contents($this->filePath, json_encode($all, JSON_PRETTY_PRINT));
-        (new \App\Core\GitHubSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto save recurring transactions");
+        (new \App\Core\GitSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto save recurring transactions");
     }
     
     public function delete(string $id): void
@@ -64,7 +64,7 @@ class RecurringManager
         $all = $this->getAll();
         $all = array_filter($all, fn($item) => $item['id'] !== $id);
         file_put_contents($this->filePath, json_encode(array_values($all), JSON_PRETTY_PRINT));
-        (new \App\Core\GitHubSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto delete recurring transaction");
+        (new \App\Core\GitSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto delete recurring transaction");
     }
     
     public function processPending(): void
@@ -106,7 +106,7 @@ class RecurringManager
         
         if ($changed) {
             file_put_contents($this->filePath, json_encode($all, JSON_PRETTY_PRINT));
-            (new \App\Core\GitHubSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto process recurring transactions");
+            (new \App\Core\GitSyncService())->syncFile(basename($this->filePath), file_get_contents($this->filePath), "Auto process recurring transactions");
         }
     }
     

@@ -96,7 +96,7 @@ class FilesController
         }
 
         file_put_contents($filePath, $content);
-        (new \App\Core\GitHubSyncService())->syncFile(basename($filename), $content, "Updated {$filename} via File Manager");
+        (new \App\Core\GitSyncService())->syncFile(basename($filename), $content, "Updated {$filename} via File Manager");
 
         $cache = new \App\Cache\CacheManager();
         $cache->invalidateFile(basename($filename, '.journal'));

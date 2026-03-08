@@ -391,12 +391,21 @@ $router->get('/transactions', function() {
     rsort($names);
 
     $allTransactions = [];
+    $idx = 0;
     foreach ($names as $name) {
         $txs = $cache->getFileData($name);
-        $allTransactions = array_merge($allTransactions, $txs);
+        foreach ($txs as $tx) {
+            $tx['_order'] = $idx++;
+            $allTransactions[] = $tx;
+        }
     }
 
-    usort($allTransactions, fn($a, $b) => strcmp($b['date'], $a['date']));
+    usort($allTransactions, function($a, $b) {
+        $dateCmp = strcmp($b['date'], $a['date']);
+        if ($dateCmp !== 0) return $dateCmp;
+        // A parità di data, mostriamo per prima l'ultima inserita nel file
+        return $b['_order'] <=> $a['_order'];
+    });
 
     render('transactions', [
         'title' => 'Cinghy - Transactions',
@@ -818,10 +827,12 @@ $router->post('/settings', function() {
         'accent_color' => $_POST['accent_color'] ?? '#32e68f',
         'theme' => $_POST['theme'] ?? 'system',
         'dashboard_widgets' => array_values(array_intersect($_POST['dashboard_widgets_order'] ?? [], $_POST['enabled_widgets'] ?? [])),
-        'github_sync_enabled' => isset($_POST['github_sync_enabled']),
-        'github_token' => trim($_POST['github_token'] ?? ''),
-        'github_repo' => trim($_POST['github_repo'] ?? ''),
-        'github_branch' => trim($_POST['github_branch'] ?? 'main'),
+        'git_sync_enabled' => isset($_POST['git_sync_enabled']),
+        'git_service' => $_POST['git_service'] ?? 'github',
+        'git_base_url' => trim($_POST['git_base_url'] ?? 'https://codeberg.org'),
+        'git_token' => trim($_POST['git_token'] ?? ''),
+        'git_repo' => trim($_POST['git_repo'] ?? ''),
+        'git_branch' => trim($_POST['git_branch'] ?? 'main'),
     ];
     $ctx->saveSettings($newSettings);
     header('Location: /settings?saved=1');
@@ -1112,4 +1123,4 @@ $router->post('/recurring/delete', function() {
 });
 
 $router->dispatch();
-\App\Core\GitHubSyncService::flushAndContinue();
+\App\Core\GitSyncService::flushAndContinue();

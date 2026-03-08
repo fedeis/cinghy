@@ -69,7 +69,48 @@ usort($upcomingExecutions, fn($a, $b) => strcmp($a['next_run_date'], $b['next_ru
     </div>
 </div>
 
-<div class="card">
+<div class="mobile-only">
+    <h3 class="mb-md"><?php echo __('auto_all_rules'); ?></h3>
+    <?php if (empty($recurring)): ?>
+        <p class="text-sm text-muted"><?php echo __('auto_no_rules'); ?></p>
+    <?php else: ?>
+        <?php foreach ($recurring as $rec): ?>
+            <div class="card p-md mb-md">
+                <div class="flex-row justify-between align-start mb-sm">
+                    <div>
+                        <strong><?php echo htmlspecialchars($rec['payee']); ?></strong>
+                        <div class="text-xs text-muted mt-xs" style="font-family: monospace;"><?php echo htmlspecialchars($rec['description']); ?></div>
+                    </div>
+                    <div class="flex-col align-end gap-xs">
+                        <span class="text-sm font-bold" style="color: <?php echo ($rec['next_run_date'] <= $today) ? 'var(--accent-color)' : 'var(--text-primary)'; ?>;">
+                            <?php echo htmlspecialchars($rec['next_run_date']); ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex-row justify-between align-center mt-md pt-sm border-top">
+                    <span style="font-size: 0.75rem; background: var(--surface-3); padding: 0.2rem 0.5rem; border-radius: 4px; display:inline-flex; gap: 4px; align-items:center;">
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <?php echo ucfirst($rec['frequency']); ?>
+                        <?php if ($rec['interval'] > 1): ?>
+                            (x<?php echo $rec['interval']; ?>)
+                        <?php endif; ?>
+                    </span>
+                    <div class="flex-row gap-xs">
+                        <a href="/recurring/edit?id=<?php echo urlencode($rec['id']); ?>" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.8rem;"><?php echo __('files_edit_title'); ?></a>
+                        <form action="/recurring/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this automated transaction?')">
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($rec['id']); ?>">
+                            <button type="submit" class="btn btn-danger btn-sm" style="background: #ff4d4d33; color: #ff4d4d; padding: 4px 8px; font-size: 0.8rem;"><?php echo __('admin_delete'); ?></button>
+                            <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
+<div class="card desktop-only">
     <h3 class="mb-md"><?php echo __('auto_all_rules'); ?></h3>
     <?php if (empty($recurring)): ?>
         <p class="text-sm text-muted"><?php echo __('auto_no_rules'); ?></p>

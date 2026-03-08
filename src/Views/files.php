@@ -5,7 +5,31 @@
     </div>
 </div>
 
-<div class="card p-0">
+<div class="mobile-only">
+    <?php foreach ($files as $file): ?>
+        <div class="card p-md mb-md">
+            <div class="flex-row justify-between align-center mb-sm">
+                <strong><a href="/files/edit?file=<?php echo urlencode($file['name']); ?>" title="Edit"><?php echo htmlspecialchars($file['name']); ?></a></strong>
+                <div class="flex-row gap-xs">
+                    <form action="/files/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this file? This cannot be undone.')">
+                        <input type="hidden" name="filename" value="<?php echo htmlspecialchars($file['name']); ?>">
+                        <button type="submit" class="btn-icon" title="Delete">🗑️</button>
+                        <input type="hidden" name="csrf_token" value="<?= \App\Core\Router::csrfToken() ?>">
+                    </form>
+                </div>
+            </div>
+            <div class="flex-row justify-between text-sm text-muted">
+                <span><?php echo number_format($file['size'] / 1024, 1); ?> KB</span>
+                <span><?php echo date('d/m/y H:i', $file['modified']); ?></span>
+            </div>
+        </div>
+    <?php endforeach; ?>
+    <?php if (empty($files)): ?>
+        <div class="card p-lg text-center text-muted">No journal files found.</div>
+    <?php endif; ?>
+</div>
+
+<div class="card p-0 desktop-only">
     <table class="table files">
         <thead>
             <tr>

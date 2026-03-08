@@ -88,9 +88,9 @@ class TransactionWriter
         // 3. Append to File
         file_put_contents($file, $content, FILE_APPEND | LOCK_EX);
 
-        // Sync with GitHub if enabled
+        // Sync with Git if enabled
         $fullContent = file_get_contents($file);
-        $syncService = new \App\Core\GitHubSyncService();
+        $syncService = new \App\Core\GitSyncService();
         $syncService->syncFile(basename($file), $fullContent, "Auto save transaction: " . $transaction->payee);
 
         // 4. Invalidate Cache

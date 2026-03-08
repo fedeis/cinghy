@@ -180,25 +180,42 @@
     </section>
 
     <section class="card">
-        <h3><?php echo __('settings_github_sync'); ?></h3>
+        <h3><?php echo __('settings_git_sync'); ?></h3>
         
         <div class="row align-center gap-md mb-4">
-            <input type="checkbox" name="github_sync_enabled" id="github_sync_enabled" value="1" <?php echo ($settings['github_sync_enabled'] ?? false) ? 'checked' : ''; ?> class="auto-width" onchange="document.getElementById('gh-options').style.display = this.checked ? 'block' : 'none'">
-            <label for="github_sync_enabled"><?php echo __('settings_github_enable'); ?></label>
+            <input type="checkbox" name="git_sync_enabled" id="git_sync_enabled" value="1" <?php echo ($settings['git_sync_enabled'] ?? false) ? 'checked' : ''; ?> class="auto-width" onchange="document.getElementById('git-options').style.display = this.checked ? 'block' : 'none'">
+            <label for="git_sync_enabled"><?php echo __('settings_git_enable'); ?></label>
         </div>
         
-        <div id="gh-options" style="display: <?php echo ($settings['github_sync_enabled'] ?? false) ? 'block' : 'none'; ?>; padding: 1rem; background: var(--surface-3); border-radius: 8px;">
+        <div id="git-options" style="display: <?php echo ($settings['git_sync_enabled'] ?? false) ? 'block' : 'none'; ?>; padding: 1rem; background: var(--surface-3); border-radius: 8px;">
+            <div class="row mb-sm align-center gap-md">
+                <label><?php echo __('settings_git_service'); ?>:</label>
+                <div class="flex-row gap-lg">
+                    <label class="flex-row align-center gap-xs">
+                        <input type="radio" name="git_service" value="github" <?php echo ($settings['git_service'] ?? 'github') === 'github' ? 'checked' : ''; ?> class="auto-width" onchange="document.getElementById('git-url-row').style.display = 'none';"> GitHub
+                    </label>
+                    <label class="flex-row align-center gap-xs">
+                        <input type="radio" name="git_service" value="codeberg" <?php echo ($settings['git_service'] ?? '') === 'codeberg' ? 'checked' : ''; ?> class="auto-width" onchange="document.getElementById('git-url-row').style.display = 'flex';"> Codeberg / Gitea
+                    </label>
+                </div>
+            </div>
+
+            <div class="row mb-sm" id="git-url-row" style="display: <?php echo ($settings['git_service'] ?? 'github') === 'codeberg' ? 'flex' : 'none'; ?>;">
+                <label><?php echo __('settings_git_base_url'); ?>:</label>
+                <input type="text" name="git_base_url" value="<?php echo htmlspecialchars($settings['git_base_url'] ?? 'https://codeberg.org'); ?>" placeholder="https://codeberg.org">
+            </div>
+
             <div class="row mb-sm">
-                <label><?php echo __('settings_github_token'); ?>:</label>
-                <input type="password" name="github_token" value="<?php echo htmlspecialchars($settings['github_token'] ?? ''); ?>" placeholder="ghp_....................................">
+                <label><?php echo __('settings_git_token'); ?>:</label>
+                <input type="password" name="git_token" value="<?php echo htmlspecialchars($settings['git_token'] ?? $settings['github_token'] ?? ''); ?>" placeholder="Token / Personal Access Token">
             </div>
             <div class="row mb-sm">
-                <label><?php echo __('settings_github_repo'); ?>:</label>
-                <input type="text" name="github_repo" value="<?php echo htmlspecialchars($settings['github_repo'] ?? ''); ?>" placeholder="federico/finance-data">
+                <label><?php echo __('settings_git_repo'); ?>:</label>
+                <input type="text" name="git_repo" value="<?php echo htmlspecialchars($settings['git_repo'] ?? $settings['github_repo'] ?? ''); ?>" placeholder="owner/repository">
             </div>
             <div class="row">
-                <label><?php echo __('settings_github_branch'); ?>:</label>
-                <input type="text" name="github_branch" value="<?php echo htmlspecialchars($settings['github_branch'] ?? 'main'); ?>" placeholder="main">
+                <label><?php echo __('settings_git_branch'); ?>:</label>
+                <input type="text" name="git_branch" value="<?php echo htmlspecialchars($settings['git_branch'] ?? $settings['github_branch'] ?? 'main'); ?>" placeholder="main">
             </div>
         </div>
     </section>

@@ -65,11 +65,13 @@ return [
     
     'settings_dashboard_widgets' => 'Dashboard Widgets',
     
-    'settings_github_sync' => 'GitHub Cloud Sync',
-    'settings_github_enable' => 'Enable Cloud Sync with GitHub API',
-    'settings_github_token' => 'GitHub Personal Access Token',
-    'settings_github_repo' => 'Repository (Owner/Name)',
-    'settings_github_branch' => 'Branch',
+    'settings_git_sync' => 'Online Backup (Git)',
+    'settings_git_enable' => 'Enable automatic backup to Git repository',
+    'settings_git_service' => 'Service',
+    'settings_git_base_url' => 'Instance URL (Gitea)',
+    'settings_git_token' => 'Personal Access Token',
+    'settings_git_repo' => 'Repository (Owner/Name)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'System Utilities',
     'settings_reset_cache' => 'Reset Cache',
