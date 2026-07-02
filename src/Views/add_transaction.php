@@ -96,13 +96,13 @@ $termExpenses = $settings['term_expenses'] ?? 'Expenses';
         setupAutocomplete(document.getElementById("payee-input"), (val) => {
             return AUTOCOMPLETE_DATA.payees
                 .filter(p => p.toLowerCase().includes(val.toLowerCase()))
-                .slice(0, 10);
+                .slice(0, 7);
         });
 
         setupAutocomplete(document.getElementById("memo-input"), (val) => {
             const payee = document.getElementById("payee-input").value;
             const correlated = (AUTOCOMPLETE_DATA.correlations[payee] || {}).memos || [];
-            return correlated.filter(m => m.toLowerCase().includes(val.toLowerCase())).slice(0, 10);
+            return correlated.filter(m => m.toLowerCase().includes(val.toLowerCase())).slice(0, 7);
         });
 
         // Helper for accounts
@@ -112,7 +112,7 @@ $termExpenses = $settings['term_expenses'] ?? 'Expenses';
                 const correlated = (AUTOCOMPLETE_DATA.correlations[payee] || {}).accounts || [];
                 const all = AUTOCOMPLETE_DATA.accounts;
                 const combined = Array.from(new Set([...correlated, ...all]));
-                return combined.filter(a => a.toLowerCase().includes(val.toLowerCase())).slice(0, 15);
+                return combined.filter(a => a.toLowerCase().includes(val.toLowerCase())).slice(0, 7);
             });
         };
 

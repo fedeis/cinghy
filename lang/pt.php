@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Widgets do painel',
     
-    'settings_github_sync' => 'Sincronização na nuvem com GitHub',
-    'settings_github_enable' => 'Ativar sincronização na nuvem com API do GitHub',
-    'settings_github_token' => 'Token de acesso pessoal do GitHub',
-    'settings_github_repo' => 'Repositório (Proprietário/Nome)',
-    'settings_github_branch' => 'Branch',
+    'settings_git_sync' => 'Backup online (Git)',
+    'settings_git_enable' => 'Ativar backup automático em repositório Git',
+    'settings_git_service' => 'Serviço',
+    'settings_git_base_url' => 'URL da instância (Gitea)',
+    'settings_git_token' => 'Token de acesso pessoal',
+    'settings_git_repo' => 'Repositório (Dono/Nome)',
+    'settings_git_subdir' => 'Subdiretório (opcional)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Utilitários do sistema',
     'settings_reset_cache' => 'Redefinir cache',

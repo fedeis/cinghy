@@ -213,6 +213,10 @@
                 <label><?php echo __('settings_git_repo'); ?>:</label>
                 <input type="text" name="git_repo" value="<?php echo htmlspecialchars($settings['git_repo'] ?? $settings['github_repo'] ?? ''); ?>" placeholder="owner/repository">
             </div>
+            <div class="row mb-sm">
+                <label><?php echo __('settings_git_subdir'); ?>:</label>
+                <input type="text" name="git_subdir" value="<?php echo htmlspecialchars($settings['git_subdir'] ?? ''); ?>" placeholder="e.g. data or finance/2025">
+            </div>
             <div class="row">
                 <label><?php echo __('settings_git_branch'); ?>:</label>
                 <input type="text" name="git_branch" value="<?php echo htmlspecialchars($settings['git_branch'] ?? $settings['github_branch'] ?? 'main'); ?>" placeholder="main">

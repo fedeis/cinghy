@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Dashboard-Widgets',
     
-    'settings_github_sync' => 'GitHub Cloud-Synchronisierung',
-    'settings_github_enable' => 'Cloud-Synchronisierung mit GitHub API aktivieren',
-    'settings_github_token' => 'Persönliches GitHub-Zugriffstoken',
-    'settings_github_repo' => 'Repository (Inhaber/Name)',
-    'settings_github_branch' => 'Branch',
+    'settings_git_sync' => 'Online-Backup (Git)',
+    'settings_git_enable' => 'Automatisches Backup in Git-Repository aktivieren',
+    'settings_git_service' => 'Dienst',
+    'settings_git_base_url' => 'Instanz-URL (Gitea)',
+    'settings_git_token' => 'Persönliches Zugriffs-Token',
+    'settings_git_repo' => 'Repository (Besitzer/Name)',
+    'settings_git_subdir' => 'Unterverzeichnis (optional)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Systemdienstprogramme',
     'settings_reset_cache' => 'Cache zurücksetzen',
@@ -146,6 +149,15 @@ return [
     'month_10' => 'Oktober',
     'month_11' => 'November',
     'month_12' => 'Dezember',
+
+    // Checkpoint
+    'checkpoint_set_btn'       => 'Kontrollpunkt setzen',
+    'checkpoint_last_label'    => 'Letzte Prüfung',
+    'checkpoint_modal_title'   => 'Kontrollpunkt setzen',
+    'checkpoint_modal_body'    => 'Alle Transaktionen bis heute werden als geprüft markiert. Neues Datum:',
+    'checkpoint_modal_cancel'  => 'Abbrechen',
+    'checkpoint_modal_confirm' => 'Bestätigen',
+    'checkpoint_verified_label'=> 'Geprüft',
 
     // Errors & Discrepancy
     'error_heuristic_mismatch' => "Warnung: Es gibt eine Diskrepanz zwischen Ihren gespeicherten Einstellungen und der tatsächlichen Formatierung Ihrer .journal-Datei. Bitte überprüfen Sie die Einstellungen.",

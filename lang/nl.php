@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Dashboard-widgets',
     
-    'settings_github_sync' => 'GitHub cloudsynchronisatie',
-    'settings_github_enable' => 'Cloudsynchronisatie met GitHub API inschakelen',
-    'settings_github_token' => 'Persoonlijk GitHub-toegangstoken',
-    'settings_github_repo' => 'Repository (Eigenaar/Naam)',
-    'settings_github_branch' => 'Branch',
+    'settings_git_sync' => 'Online backup (Git)',
+    'settings_git_enable' => 'Automatische backup naar Git-repository inschakelen',
+    'settings_git_service' => 'Dienst',
+    'settings_git_base_url' => 'Instantie URL (Gitea)',
+    'settings_git_token' => 'Persoonlijk toegangstoken',
+    'settings_git_repo' => 'Repository (Eigenaar/Naam)',
+    'settings_git_subdir' => 'Submap (optioneel)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Systeemhulpprogramma\'s',
     'settings_reset_cache' => 'Cache resetten',

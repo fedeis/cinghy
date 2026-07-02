@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Віджети панелі',
     
-    'settings_github_sync' => 'Хмарна синхронізація GitHub',
-    'settings_github_enable' => 'Увімкнути хмарну синхронізацію з API GitHub',
-    'settings_github_token' => 'Персональний токен доступу GitHub',
-    'settings_github_repo' => 'Репозиторій (Власник/Назва)',
-    'settings_github_branch' => 'Гілка',
+    'settings_git_sync' => 'Онлайн-резервне копіювання (Git)',
+    'settings_git_enable' => 'Увімкнути автоматичне резервне копіювання в репозиторій Git',
+    'settings_git_service' => 'Сервіс',
+    'settings_git_base_url' => 'URL інстансу (Gitea)',
+    'settings_git_token' => 'Персональний токен доступу',
+    'settings_git_repo' => 'Репозиторій (Власник/Назва)',
+    'settings_git_subdir' => 'Підкаталог (необов\'язково)',
+    'settings_git_branch' => 'Гілка (Branch)',
     
     'settings_system_utilities' => 'Системні утиліти',
     'settings_reset_cache' => 'Скинути кеш',

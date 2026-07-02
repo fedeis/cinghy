@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Widżety pulpitu',
     
-    'settings_github_sync' => 'Synchronizacja z chmurą GitHub',
-    'settings_github_enable' => 'Włącz synchronizację z chmurą przez API GitHub',
-    'settings_github_token' => 'Osobisty token dostępu GitHub',
-    'settings_github_repo' => 'Repozytorium (Właściciel/Nazwa)',
-    'settings_github_branch' => 'Gałąź',
+    'settings_git_sync' => 'Kopia zapasowa online (Git)',
+    'settings_git_enable' => 'Włącz automatyczną kopię zapasową w repozytorium Git',
+    'settings_git_service' => 'Usługa',
+    'settings_git_base_url' => 'URL instancji (Gitea)',
+    'settings_git_token' => 'Osobisty token dostępu',
+    'settings_git_repo' => 'Repozytorium (Właściciel/Nazwa)',
+    'settings_git_subdir' => 'Podkatalog (opcjonalny)',
+    'settings_git_branch' => 'Gałąź (Branch)',
     
     'settings_system_utilities' => 'Narzędzia systemowe',
     'settings_reset_cache' => 'Zresetuj pamięć podręczną',

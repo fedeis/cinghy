@@ -71,6 +71,7 @@ return [
     'settings_git_base_url' => 'URL Istanza (Gitea)',
     'settings_git_token' => 'Token di accesso personale',
     'settings_git_repo' => 'Repository (Proprietario/Nome)',
+    'settings_git_subdir' => 'Sottocartella (opzionale)',
     'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Utilità di sistema',
@@ -105,6 +106,8 @@ return [
     'tx_btn_save' => 'Salva transazione',
     'tx_btn_update' => 'Aggiorna transazione',
     'tx_btn_cancel' => 'Annulla',
+    'tx_search_placeholder' => 'Cerca transazioni...',
+    'tx_no_transactions' => 'Nessuna transazione trovata.',
     
     // Automated
     'auto_title' => 'Transazioni automatizzate',
@@ -149,6 +152,15 @@ return [
     'month_10' => 'Ottobre',
     'month_11' => 'Novembre',
     'month_12' => 'Dicembre',
+
+    // Checkpoint
+    'checkpoint_set_btn'       => 'Imposta Checkpoint',
+    'checkpoint_last_label'    => 'Ultimo controllo',
+    'checkpoint_modal_title'   => 'Imposta Checkpoint',
+    'checkpoint_modal_body'    => 'Tutte le transazioni fino ad oggi verranno segnate come verificate. Nuova data checkpoint:',
+    'checkpoint_modal_cancel'  => 'Annulla',
+    'checkpoint_modal_confirm' => 'Conferma',
+    'checkpoint_verified_label'=> 'Verificata',
 
     // Errors & Discrepancy
     'error_heuristic_mismatch' => "Attenzione: c'è una discrepanza tra le impostazioni salvate e la formattazione effettiva del file .journal. Controlla le Impostazioni.",

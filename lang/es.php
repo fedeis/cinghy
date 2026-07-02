@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Widgets del panel',
     
-    'settings_github_sync' => 'Sincronización en la nube con GitHub',
-    'settings_github_enable' => 'Activar sincronización en la nube con API de GitHub',
-    'settings_github_token' => 'Token de acceso personal de GitHub',
-    'settings_github_repo' => 'Repositorio (Propietario/Nombre)',
-    'settings_github_branch' => 'Rama',
+    'settings_git_sync' => 'Copia de seguridad en línea (Git)',
+    'settings_git_enable' => 'Activar copia de seguridad automática en repositorio Git',
+    'settings_git_service' => 'Servicio',
+    'settings_git_base_url' => 'URL de la instancia (Gitea)',
+    'settings_git_token' => 'Token de acceso personal',
+    'settings_git_repo' => 'Repositorio (Dueño/Nombre)',
+    'settings_git_subdir' => 'Subdirectorio (opcional)',
+    'settings_git_branch' => 'Rama (Branch)',
     
     'settings_system_utilities' => 'Utilidades del sistema',
     'settings_reset_cache' => 'Restablecer caché',
@@ -146,6 +149,15 @@ return [
     'month_10' => 'Octubre',
     'month_11' => 'Noviembre',
     'month_12' => 'Diciembre',
+
+    // Checkpoint
+    'checkpoint_set_btn'       => 'Establecer punto de control',
+    'checkpoint_last_label'    => 'Último control',
+    'checkpoint_modal_title'   => 'Establecer punto de control',
+    'checkpoint_modal_body'    => 'Todas las transacciones hasta hoy se marcarán como verificadas. Nueva fecha:',
+    'checkpoint_modal_cancel'  => 'Cancelar',
+    'checkpoint_modal_confirm' => 'Confirmar',
+    'checkpoint_verified_label'=> 'Verificada',
 
     // Errors & Discrepancy
     'error_heuristic_mismatch' => "Advertencia: hay una discrepancia entre su configuración guardada y el formato real de su archivo .journal. Por favor, revise la Configuración.",

@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Kojelaudan widgetit',
     
-    'settings_github_sync' => 'GitHub-pilvisynkronointi',
-    'settings_github_enable' => 'Ota pilvisynkronointi käyttöön GitHub API:n kanssa',
-    'settings_github_token' => 'Henkilökohtainen GitHub-käyttöoikeustunnus',
-    'settings_github_repo' => 'Tietovarasto (Omistaja/Nimi)',
-    'settings_github_branch' => 'Haara',
+    'settings_git_sync' => 'Verkkovarmuuskopio (Git)',
+    'settings_git_enable' => 'Ota käyttöön automaattinen varmuuskopiointi Git-varastoon',
+    'settings_git_service' => 'Palvelu',
+    'settings_git_base_url' => 'Instanssin URL (Gitea)',
+    'settings_git_token' => 'Henkilökohtainen pääsyavain',
+    'settings_git_repo' => 'Varasto (Omistaja/Nimi)',
+    'settings_git_subdir' => 'Alakansio (valinnainen)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Järjestelmätyökalut',
     'settings_reset_cache' => 'Nollaa välimuisti',

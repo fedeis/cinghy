@@ -137,6 +137,30 @@ $appSettings = UserContext::get()->getSettings();
 
 // --- Report Helpers ---
 
+/**
+ * Read the last checkpoint date from all journal files.
+ * Looks for lines matching: ; -- LAST CHECK: YYYY-MM-DD --
+ */
+function getCheckpointDate(): ?string {
+    $ctx = UserContext::get();
+    $dataPath = $ctx->getDataPath();
+    $files = glob($dataPath . '/*.journal');
+    if (empty($files)) return null;
+    rsort($files); // newest file first
+    $pattern = '/^;\s*--\s*LAST CHECK:\s*(\d{4}-\d{2}-\d{2})\s*--/';
+    foreach ($files as $file) {
+        $handle = fopen($file, 'r');
+        while (($line = fgets($handle)) !== false) {
+            if (preg_match($pattern, $line, $m)) {
+                fclose($handle);
+                return $m[1];
+            }
+        }
+        fclose($handle);
+    }
+    return null;
+}
+
 function formatCurrency(float $amount, array $settings): string {
     $formatted = number_format(abs($amount), 2, $settings['decimal_sep'], $settings['thousands_sep']);
     $symbol = $settings['currency_symbol'] ?? 'EUR';
@@ -284,7 +308,8 @@ $router->get('/', function() {
         'user' => htmlspecialchars($ctx->getUsername()),
         'path' => htmlspecialchars($ctx->getDataPath()),
         'settings' => $settings,
-        'has_discrepancy' => $discrepancy
+        'has_discrepancy' => $discrepancy,
+        'checkpointDate' => getCheckpointDate()
     ]);
 });
 
@@ -409,8 +434,53 @@ $router->get('/transactions', function() {
 
     render('transactions', [
         'title' => 'Cinghy - Transactions',
-        'allTransactions' => $allTransactions
+        'allTransactions' => $allTransactions,
+        'checkpointDate' => getCheckpointDate()
     ]);
+});
+
+$router->post('/checkpoint/set', function() {
+    $ctx = UserContext::get();
+    $dataPath = $ctx->getDataPath();
+    $files = glob($dataPath . '/*.journal');
+    if (empty($files)) {
+        header('Location: /');
+        exit;
+    }
+    rsort($files); // write into newest file
+    $targetFile = $files[0];
+
+    $today = date('Y-m-d');
+    $checkLine = "; -- LAST CHECK: {$today} --";
+    $pattern = '/^;\s*--\s*LAST CHECK:.*--\s*$/';
+
+    $lines = file($targetFile, FILE_IGNORE_NEW_LINES);
+    $found = false;
+    foreach ($lines as &$line) {
+        if (preg_match($pattern, $line)) {
+            $line = $checkLine;
+            $found = true;
+            break;
+        }
+    }
+    unset($line);
+    if (!$found) {
+        // Remove trailing blank lines, then append
+        while (!empty($lines) && trim(end($lines)) === '') {
+            array_pop($lines);
+        }
+        $lines[] = '';
+        $lines[] = $checkLine;
+    }
+
+    file_put_contents($targetFile, implode("\n", $lines) . "\n");
+
+    // Invalidate cache for this file so the parser re-reads it
+    $cache = new CacheManager();
+    $cache->invalidateFile(basename($targetFile, '.journal'));
+
+    header('Location: /');
+    exit;
 });
 
 $router->get('/transactions/add', function() {
@@ -832,6 +902,7 @@ $router->post('/settings', function() {
         'git_base_url' => trim($_POST['git_base_url'] ?? 'https://codeberg.org'),
         'git_token' => trim($_POST['git_token'] ?? ''),
         'git_repo' => trim($_POST['git_repo'] ?? ''),
+        'git_subdir' => trim($_POST['git_subdir'] ?? '', '/ '),
         'git_branch' => trim($_POST['git_branch'] ?? 'main'),
     ];
     $ctx->saveSettings($newSettings);

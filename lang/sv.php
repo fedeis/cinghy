@@ -65,11 +65,14 @@ return [
     
     'settings_dashboard_widgets' => 'Instrumentpanelwidgetar',
     
-    'settings_github_sync' => 'GitHub molnsynkronisering',
-    'settings_github_enable' => 'Aktivera molnsynkronisering med GitHub API',
-    'settings_github_token' => 'Personlig GitHub-åtkomsttoken',
-    'settings_github_repo' => 'Arkiv (Ägare/Namn)',
-    'settings_github_branch' => 'Gren',
+    'settings_git_sync' => 'Online-backup (Git)',
+    'settings_git_enable' => 'Aktivera automatisk backup till Git-arkiv',
+    'settings_git_service' => 'Tjänst',
+    'settings_git_base_url' => 'Instans-URL (Gitea)',
+    'settings_git_token' => 'Personlig åtkomsttoken',
+    'settings_git_repo' => 'Arkiv (Ägare/Namn)',
+    'settings_git_subdir' => 'Underkatalog (valfritt)',
+    'settings_git_branch' => 'Branch',
     
     'settings_system_utilities' => 'Systemverktyg',
     'settings_reset_cache' => 'Återställ cache',

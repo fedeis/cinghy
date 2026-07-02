@@ -41,6 +41,7 @@ class GitSyncService
                 'repo'     => $repo,
                 'branch'   => $branch,
                 'base_url' => $baseUrl,
+                'subdir'   => trim($settings['git_subdir'] ?? '', '/ '),
             ],
         ];
     }
@@ -89,8 +90,11 @@ class GitSyncService
         $branch  = $settings['branch'];
         $baseUrl = $settings['base_url'];
 
+        $subdir  = $settings['subdir'] ?? '';
+        $path = !empty($subdir) ? $subdir . '/' . $filename : $filename;
+
         if ($service === 'github') {
-            $apiUrl = "https://api.github.com/repos/{$repo}/contents/{$filename}";
+            $apiUrl = "https://api.github.com/repos/{$repo}/contents/{$path}";
             $headers = [
                 'Authorization: Bearer ' . $token,
                 'User-Agent: Cinghy-App',
@@ -100,7 +104,7 @@ class GitSyncService
         } else {
             // Codeberg / Gitea API
             $base = rtrim($baseUrl ?: 'https://codeberg.org', '/') . '/api/v1';
-            $apiUrl = "{$base}/repos/{$repo}/contents/{$filename}";
+            $apiUrl = "{$base}/repos/{$repo}/contents/{$path}";
             $headers = [
                 'Authorization: token ' . $token,
                 'User-Agent: Cinghy-App',
